@@ -1,5 +1,5 @@
 # Start-interactive
-Starts process as System interactivly on each reboot during an OSD after "Setup Windows and ConfigMgr".
+Starts a process as System interactivly on each reboot during an OSD after "Setup Windows and ConfigMgr".
 
 Deletes the task automatically when the OSD is done, if it has failed or if the current console user isn't SYSTEM.
 

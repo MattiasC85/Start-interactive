@@ -5,4 +5,4 @@ Deletes the task automatically when the OSD is done, if it has failed or if the 
 
 ![alt text](https://raw.githubusercontent.com/MattiasC85/Start-interactive/master/Start-Interactive/start-task.png)
 
-(Another, safer way, to do accomplish the same thing is undergoing tests)
+(Another, safer way, to accomplish the same thing is undergoing tests)

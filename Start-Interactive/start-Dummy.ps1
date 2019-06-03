@@ -451,7 +451,6 @@ namespace DesktopLauncher
 
 "@
 
-#Start-Transcript -Path "C:\tttttt.log" -Append
 function DeleteTask($FullPathToScript)
 {
 write-host "Path to Script" $FullPathToScript
@@ -460,18 +459,20 @@ $tasks=Get-ScheduledTask | Where-Object {$_.Actions.Arguments} | Where-Object {$
 
 write-host "Deleting" $tasks.TaskName
 Unregister-ScheduledTask -TaskName $tasks.TaskName -Confirm:$false
+[System.IO.File]::Delete($FullPathToScript)
 }
 
 $Provmode=(Get-ItemProperty -Path HKLM:\SOFTWARE\Microsoft\ccm\CcmExec -Name ProvisioningMode).ProvisioningMode
 write-host "Provisioning mode:" $Provmode
-$process = "C:\TSBackground\TSBackground.exe"
-$arguments = $null
+$process = "xxExexx"
+$arguments = "xxArgumentsxx"
 $CurId=[System.Security.Principal.WindowsIdentity]::GetCurrent()
 Write-host "Current Process running as System: " $CurId.IsSystem
 
 $ConsoleSessionID=[DesktopLauncher.WinApi]::WTSGetActiveConsoleSessionId()
 Write-Host "Console SessionID: " $ConsoleSessionID
 
+#$Provmode=$false #testar
 $Processes=(Get-Process *).ProcessName
 if ($Provmode -ne "false")
 {
@@ -486,12 +487,13 @@ if ($Provmode -ne "false")
         {
 	
         }
-    	If (($Processes.Contains("TSManager")) -and ((gwmi Win32_computersystem).Username -eq $null))
+    	If (($Processes.Contains("TSManager")) -and ((gwmi Win32_computersystem).Username -eq $null) -and ($ConsoleToken -eq $false))
     	{
 		    write-host "An OSD is running."
 		    $b=([System.Security.Principal.WindowsIdentity]::GetCurrent()).Token
     	}
         Start-Sleep -Milliseconds 300
+        $Processes=(Get-Process *).ProcessName
     }
 }
 else
@@ -505,6 +507,7 @@ exit
 
 
 
+#$b=([System.Security.Principal.WindowsIdentity]::GetCurrent()).Token #testar
 #$ConsoleToken=[DesktopLauncher.WinApi]::WTSQueryUserToken($ConsoleSessionID,[ref]$b)
 
 $Consoleuser=[System.Security.Principal.WindowsIdentity]::new($b)
@@ -512,11 +515,6 @@ Write-host "Console Username: " $Consoleuser.Name
 Write-host "Console user is system: " $Consoleuser.IsSystem
 
 
-<#[WinApi.WTSQueryUserToken(
-              WinApi.WTSGetActiveConsoleSessionId(),
-              out interactiveUserToken))#>
-#Stop-Transcript
-#exit
 if ($Consoleuser.IsSystem -eq $true)
 {
 Write-host "Console user is system. Launching task interactive."
@@ -533,48 +531,3 @@ exit
 
 Stop-Transcript
 exit
-<#
-$proc=[System.Diagnostics.Process]::GetCurrentProcess()
-$SessionId=$proc.SessionId
-$Id=$proc.Id
-
-$cmd=Get-CimInstance Win32_Process -Filter "ProcessId=$Id" | select CommandLine
-$process=$cmd.CommandLine.Split(" ")
-
-For ($i=1;$i -lt $process.Count;$i++)
-{
-    [string]$para+=($process[$i]+" ")
-}
-
-If ($SessionId -eq 0)
-{
-    Write-host "Session is 0"
-    $process = $proc.MainModule.FileName
-    $arguments = $para
-    write-host "Launching" $process $para
-    #Stop-Transcript
-    sleep -Seconds 1
-    [DesktopLauncher.Program]::Launch($process, "-WindowStyle Hidden $arguments")
-    Stop-Transcript
-    exit
-}
-else
-{
-    write-host ([System.Security.Principal.WindowsIdentity]::GetCurrent()).Name
-    write-host "SessionID" $SessionId
-    $a=([KeyTrigger.Program]::Main());
-    write-host $a
-    $abort=$false
-    while ($abort -ne $true)
-    {
-        If ($a -eq 2)
-        {
-            $process = "xxDummyxx\TSBackground.exe"
-            $arguments = $null
-            [DesktopLauncher.Program]::Launch($process, $arguments)
-            $a=0
-            $a=([KeyTrigger.Program]::Main());
-        }
-    }
-}
-Stop-Transcript#>
